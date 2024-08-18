@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Alkalami&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather</title>
+    <link rel="stylesheet" href="weather.css">
+</head>
+
+<body>
+    <main id="home">
+        <nav>
+            <ul>
+                <a href="#home">
+                    <li>Home</li>
+                </a>
+                <a href="#about">
+                    <li>About
+                </a></li>
+            </ul>
+        </nav>
+        <h6><input onchange="inputname()" type="text" class="input" placeholder="search your city..."></h6>
+        <h6> <input onclick="inputname()" type="submit" id="submit" value="SUBMIT"></h6>
+        <h5>
+            <section></section>
+                <article>
+                    <span>Feels Like
+                        temperature:</span><span></span><span>Date:</span><span></span><span>Humidity:</span><span></span><span>Wind
+                        Speed:</span><span></span><span>Pressure:</span><span></span>
+                </article>
+        </h5>
+    </main>
+    <footer id="about">
+        <p>Currently We are only providing Weather Forecast for Indian Cities</p>
+        <p>Please avoid shortforms for searching city names</p>
+        <p>Contact Us</p>
+        <p>Phone no.xxxxxxxxxx</p>
+        <p>E-mail.xyz@gmail.com</p>
+    </footer>
+</body>
+
+<script>
+    let condition = document.querySelector("h1");
+    let city = document.querySelector("h3");
+    let cent = document.querySelector("h4");
+    let article = document.querySelectorAll("article span");
+    let current_city = null;
+    let section = document.querySelector("section")
+    let main = document.querySelector("#home")
+
+    function inputname() {
+        section.innerHTML = `<div class="loader"></div>`
+        current_city = document.querySelector("input").value;
+        locationSearch();
+    }
+
+    async function showData(response) {
+        console.log(response);
+        section.innerHTML = `<h1>${current_city.toUpperCase()}</h1>
+                <h3>${response.current.symbolPhrase}</h3>
+                <h4><span>${response.current.temperature}</span> <sup>o</sup>C</h4>`
+        article[1].innerHTML = response.current.feelsLikeTemp + `<sup> o</sup>` + 'C';
+        article[3].innerHTML = response.current.time.slice(0,10);
+        article[5].innerHTML = response.current.relHumidity;
+        article[7].innerHTML = response.current.windSpeed + ' Kph';
+        article[9].innerHTML = response.current.pressure;
+        background(response.current.symbolPhrase)
+    }
+
+    function background(weather) {
+        main.classList = [];
+        if (weather.includes('rain') || weather.includes('shower')) {
+            main.classList.add('rain');
+        }
+        if (weather.includes('cloud')) {
+            main.classList.add('cloud');
+        }
+        if (weather.includes('sun')) {
+            main.classList.add('sun');
+        }
+        if (weather.includes('clear') || weather.includes('overcast')) {
+            main.classList.add('clear');
+        }
+        if (weather.includes('thunder')) {
+            main.classList.add('thunder');
+        }
+    }
+    async function locationSearch() {
+
+        const options = {
+            method: 'GET',
+            headers: {
+                'X-RapidAPI-Key': 'eb396e0cbdmshe638a9630b72f87p136c29jsn710173b09b44',
+                'X-RapidAPI-Host': 'foreca-weather.p.rapidapi.com'
+            }
+        };
+
+        let temp = await fetch(`https://foreca-weather.p.rapidapi.com/location/search/${current_city}?lang=en&country=in`, options)
+        let response = await temp.json();
+        console.log(response);
+        currentWeather(response.locations[0].id);
+    }
+    async function currentWeather(cityID) {
+
+        const options = {
+            method: 'GET',
+            headers: {
+                'X-RapidAPI-Key': 'eb396e0cbdmshe638a9630b72f87p136c29jsn710173b09b44',
+                'X-RapidAPI-Host': 'foreca-weather.p.rapidapi.com'
+            }
+        };
+
+
+        let temp = await fetch(`https://foreca-weather.p.rapidapi.com/current/${cityID}?alt=0&tempunit=C&windunit=MS&tz=Europe%2FLondon&lang=en`, options)
+        let response = await temp.json();
+        showData(response);
+    }
+
+
+    let check = new Promise((resolve, reject) => {
+        // resolve('Done');
+        reject('Ohh There is an Error');
+    })
+    check.catch(
+        error => console.error(error))
+</script>
+
+</html>
